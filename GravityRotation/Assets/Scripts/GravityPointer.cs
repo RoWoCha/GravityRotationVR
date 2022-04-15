@@ -54,7 +54,7 @@ public class GravityPointer : MonoBehaviour
         {
             float changeCovered = (Time.time - startTime) * lerpSpeed;
             float fractionOfChange = changeCovered / lerpLength;
-            transform.rotation = Quaternion.Lerp(startRotation, endRotation, fractionOfChange);
+            transform.rotation = Quaternion.Slerp(startRotation, endRotation, fractionOfChange);
             SetGravity();
 
             if (Vector3.Distance(transform.up.normalized, axisArray[closestAxisIndex].vector) < maxLerpGravityOffset)

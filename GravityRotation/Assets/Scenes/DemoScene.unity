@@ -411,7 +411,7 @@ GameObject:
   m_Component:
   - component: {fileID: 188842974}
   m_Layer: 0
-  m_Name: GeneralManagers
+  m_Name: General
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1461,7 +1461,7 @@ GameObject:
   - component: {fileID: 971490390}
   - component: {fileID: 971490391}
   m_Layer: 0
-  m_Name: GravityManager
+  m_Name: GravityPointer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4269,7 +4269,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e314c312157acd40b4fa730c6ae36b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetRotation: {x: 0, y: 0, z: 0, w: 0}
   lerpSpeed: 3
   maxLerpOffset: 0.01
 --- !u!1 &1755746013

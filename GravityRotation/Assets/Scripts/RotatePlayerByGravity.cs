@@ -7,7 +7,7 @@ public class RotatePlayerByGravity : MonoBehaviour
 
     // Lerp data
     Quaternion startRotation;
-    public Quaternion targetRotation;
+    Quaternion targetRotation;
     public float lerpSpeed = 1.0F;
     float startTime;
     float lerpLength;
@@ -18,6 +18,8 @@ public class RotatePlayerByGravity : MonoBehaviour
 
     Transform gravityPointerTransform;
 
+    // Lift vector distance that gets applied before starting rotation
+    public float liftDistance = 1f;
 
     private void Start()
     {
@@ -38,7 +40,7 @@ public class RotatePlayerByGravity : MonoBehaviour
             isLerping = true;
 
             // Lifting up the player to insure they don't get stuck in the ground
-            startLerpPosition = transform.position + transform.up.normalized;
+            startLerpPosition = transform.position + transform.up.normalized * liftDistance;
         }
 
         if (isLerping)
@@ -46,7 +48,7 @@ public class RotatePlayerByGravity : MonoBehaviour
             transform.position = startLerpPosition;
             float changeCovered = (Time.time - startTime) * lerpSpeed;
             float fractionOfChange = changeCovered / lerpLength;
-            currentLerpRotation = Quaternion.Lerp(startRotation, targetRotation, fractionOfChange);
+            currentLerpRotation = Quaternion.Slerp(startRotation, targetRotation, fractionOfChange);
             transform.rotation = currentLerpRotation;
 
             if (Vector3.Distance(transform.up.normalized, gravityPointerTransform.up.normalized) < maxLerpOffset)
