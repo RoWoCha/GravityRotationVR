@@ -12,31 +12,27 @@ public class InteractableRotationBall : MonoBehaviour
 	// Interactable script of the device
 	Interactable interactable;
 
-	// Rotation sensor of the device
-	public RotationSensorScript rotationSensor;
-
-	// Viewable part of the device
-	public GameObject viewableDevice;
+	// Visible part of the device
+	public GameObject visiblePart;
 
 	// Starting data
 	Vector3 startPos;
 	Quaternion startRot;
 
 	// On attachement data
-	Quaternion onAttachedRot;
-	Vector3 onAttachedPlayerPosition = Vector3.zero;
+	Quaternion onAttachRot;
+	Vector3 onAttachPlayerPosition = Vector3.zero;
 
-	// Speed of slerp updating the viewable part's rotation
+	// Speed of slerp updating the visible part's rotation
 	public float rotationSmooth = 5.0f;
 
 	// Speed of gravity rotation
-	public float gravityRotationSpeed = 0.3f;
+	public float gravityRotationSpeed = 0.2f;
 
 	public Transform playerTransform;
 
 	void Awake()
 	{
-		rotationSensor.UpdateGravityRotationSpeed(gravityRotationSpeed);
 		interactable = this.GetComponent<Interactable>();
 		startPos = transform.position;
 		startRot = transform.rotation;
@@ -79,8 +75,8 @@ public class InteractableRotationBall : MonoBehaviour
 	//-------------------------------------------------
 	private void OnAttachedToHand(Hand hand)
 	{
-		onAttachedRot = transform.rotation;
-		onAttachedPlayerPosition = playerTransform.position;
+		onAttachRot = transform.rotation;
+		onAttachPlayerPosition = playerTransform.position;
 	}
 
 	//-------------------------------------------------
@@ -88,8 +84,8 @@ public class InteractableRotationBall : MonoBehaviour
 	//-------------------------------------------------
 	private void OnDetachedFromHand(Hand hand)
 	{
-		transform.rotation = onAttachedRot;
-		viewableDevice.transform.rotation = onAttachedRot;
+		transform.rotation = onAttachRot;
+		visiblePart.transform.rotation = onAttachRot;
 		GravityPointer.instance.FinishGravityRotation();
 	}
 
@@ -99,17 +95,27 @@ public class InteractableRotationBall : MonoBehaviour
 	private void HandAttachedUpdate(Hand hand)
 	{
 		// Locking position of the player
-		playerTransform.position = onAttachedPlayerPosition;
+		playerTransform.position = onAttachPlayerPosition;
 		playerTransform.GetComponent<Rigidbody>().velocity = Vector3.zero;
 
-		// Rotating the viewable part of the device
-		Quaternion target = Quaternion.Euler(transform.rotation.eulerAngles.x - onAttachedRot.eulerAngles.x + startRot.eulerAngles.x,
-											 transform.rotation.eulerAngles.y - onAttachedRot.eulerAngles.y + startRot.eulerAngles.y,
-											 transform.rotation.eulerAngles.z - onAttachedRot.eulerAngles.z + startRot.eulerAngles.z);
-		viewableDevice.transform.rotation = Quaternion.Slerp(viewableDevice.transform.rotation, target, Time.deltaTime * rotationSmooth);
+		// Rotating the visible part of the device
+		Quaternion target = Quaternion.Euler(transform.rotation.eulerAngles.x - onAttachRot.eulerAngles.x + startRot.eulerAngles.x,
+											 transform.rotation.eulerAngles.y - onAttachRot.eulerAngles.y + startRot.eulerAngles.y,
+											 transform.rotation.eulerAngles.z - onAttachRot.eulerAngles.z + startRot.eulerAngles.z);
+		visiblePart.transform.rotation = Quaternion.Slerp(visiblePart.transform.rotation, target, Time.deltaTime * rotationSmooth);
 
-		// Updating gravity direction
-		rotationSensor.UpdateGravityDir();
+		// Getting a fraction of rotation quaternion
+		Quaternion addedRotation = Quaternion.Slerp(Quaternion.identity, visiblePart.transform.localRotation, gravityRotationSpeed * Time.deltaTime);
+
+		// Mirroring the quaternion over Y-axis
+		addedRotation.x = -addedRotation.x;
+		addedRotation.z = -addedRotation.z;
+
+		// Adding rotation to the Gravity Pointer to finalize rotation on detachment
+		GravityPointer.instance.transform.rotation = addedRotation * GravityPointer.instance.transform.rotation;
+		
+		// Applying rotation to the gravity vector
+		Physics.gravity = addedRotation * Physics.gravity;
 	}
 }
 

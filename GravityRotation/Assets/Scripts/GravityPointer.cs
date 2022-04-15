@@ -7,9 +7,6 @@ public class GravityPointer : MonoBehaviour
     // Instance of the gravity pointer
     public static GravityPointer instance = null;
 
-    // Gravity euler angles
-    [HideInInspector] public Vector3 gravityDirection;
-
     // Gravitational strength
     public float gravityStrength = 9.81f;
 
@@ -49,8 +46,6 @@ public class GravityPointer : MonoBehaviour
             instance = this;
         else
             Destroy(gameObject);
-
-        gravityDirection = transform.rotation.eulerAngles;
     }
 
     void FixedUpdate()
@@ -60,7 +55,6 @@ public class GravityPointer : MonoBehaviour
             float changeCovered = (Time.time - startTime) * lerpSpeed;
             float fractionOfChange = changeCovered / lerpLength;
             transform.rotation = Quaternion.Lerp(startRotation, endRotation, fractionOfChange);
-            gravityDirection = transform.rotation.eulerAngles;
             SetGravity();
 
             if (Vector3.Distance(transform.up.normalized, axisArray[closestAxisIndex].vector) < maxLerpGravityOffset)
@@ -70,19 +64,6 @@ public class GravityPointer : MonoBehaviour
                 shouldUpdatePlayerRotation = true;
             }
         }
-    }
-
-    // Updates pointer's direction and applies it to gravity
-    public void UpdatePointerDirection(Vector3 gravityDelta)
-    {
-        isLerping = false;
-        
-        // Update gravity pointer's euler angles
-        gravityDirection += gravityDelta;
-        transform.eulerAngles = gravityDirection;
-
-        // Update gravity
-        SetGravity();
     }
 
     // Rotates gravity to the closest axis
